@@ -94,6 +94,57 @@ exports.handler = async function(event) {
     returnValue.sections.push(sectionObject)
 
     // 🔥 your code for the reviews/ratings goes here
+
+    // Grab data from Firebase with the section reviews and IDs
+    let reviewsQuery = await db.collection('reviews').where(`sectionId`, `==`, sectionId).get()
+    
+    // Get review documents from Query
+    let reviews = reviewQuery.docs
+
+    // Define a new array for the review data
+    sectionData.reviews = {}
+
+    // Define variables for # of reviews and sum of ratings
+    let numSectionReviews = 0
+    let sumSectionRatings = 0
+
+    // Loop through the documents
+    for (let reviewIndex = 0; reviewIndex < reviews.length; reveiewIndex++){
+
+      // Grab document ID of review
+      let reviewId = reviews[reviewIndex].id
+
+      // Get data from each review
+      let reviewData = reviews[reviewIndex].data()
+
+      // 
+
+      // Add review data back into the section data
+      sectionData.reviews.push(reviewData)
+
+      // Increment review count
+      numSecReviews = numSecReviews + 1
+
+      // Increment cumulative sum for ratings
+      sumSecRatings = sumSecRatings + reviewData.rating
+
+  }
+    // Calculate number of reviews and average rating and add to section data
+      sectionData.numReviews = numSecReviews
+      sectionData.avgRating = sumSecRatings / numSecReviews
+
+    // Add section data to the course data
+      courseData.sections.push(sectionData)
+
+    // Increment number of course ratings
+      numCourseReviews = numCourseReviews + numSecReviews
+
+    // Increment cumulative sum for ratings
+      sumCourseRating = sumCourseRating + sumSecRatings
+
+    // Calculate the # of course reviews and average rating and add to course Data
+      courseData.numReviews = numCourseReviews
+      courseData.avgRating = sumCourseRating / numCourseReviews
   }
 
   // return the standard response
