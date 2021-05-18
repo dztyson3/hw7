@@ -95,59 +95,59 @@ exports.handler = async function(event) {
 
     // 🔥 your code for the reviews/ratings goes here
 
-    // Grab data from Firebase with the section reviews and IDs
-    let reviewsQuery = await db.collection('reviews').where(`sectionId`, `==`, sectionId).get()
+    // Define a new array for the review data we will query
+    sectionData.reviews = []
     
+    // Ask Firebase for the reviews and IDs that correspond to each section
+    let reviewsQuery = await db.collection(`reviews`).where(`sectionId`, `==`, sectionId).get()
+
     // Get review documents from Query
     let reviews = reviewQuery.docs
 
-    // Define a new array for the review data
-    sectionData.reviews = {}
+    // Define variables for the number of reviews and sum of their ratings
+    let sectionNumReviews = 0
+    let sectionSumRatings = 0
 
-    // Define variables for # of reviews and sum of ratings
-    let numSectionReviews = 0
-    let sumSectionRatings = 0
+    // Loop through the review documents
+    for (let reviewIndex = 0; reviewIndex < reviews.length; reviewIndex++){
 
-    // Loop through the documents
-    for (let reviewIndex = 0; reviewIndex < reviews.length; reveiewIndex++){
-
-      // Grab document ID of review
+      // Grab document ID of each review
       let reviewId = reviews[reviewIndex].id
 
       // Get data from each review
       let reviewData = reviews[reviewIndex].data()
 
-      // 
+      // Create an object to store section data
+      let reviewObject = {
+        body: reviewData.body
+        rating: reviewData.rating
+      }
 
-      // Add review data back into the section data
-      sectionData.reviews.push(reviewData)
+        // Make the review count incremental 
+        sectionNumReviews = sectionNumReviews + 1
 
-      // Increment review count
-      numSecReviews = numSecReviews + 1
+        // Make the cumulative sum of ratings incremental
+        sectionSumRatings = sectionSumRatings + reviewData.rating
+        
+      // Calculate number of reviews and average rating
+        sectionData.numReviews = sectionNumReviews
+        sectionData.avgRating = sectionSumRatings / sectionNumReviews
 
-      // Increment cumulative sum for ratings
-      sumSecRatings = sumSecRatings + reviewData.rating
+      // Append the review data into the section data
+      sectionData.reviews.push(reviewObject)
+    }
+      // Make number of course reviews incremental
+      courseNumReviews = courseNumReviews + sectionNumReviews
 
-  }
-    // Calculate number of reviews and average rating and add to section data
-      sectionData.numReviews = numSecReviews
-      sectionData.avgRating = sumSecRatings / numSecReviews
+      // Make number of course ratings incremental
+      courseSUmRating = courseSumRating + sectionSumRatings
 
-    // Add section data to the course data
-      courseData.sections.push(sectionData)
-
-    // Increment number of course ratings
-      numCourseReviews = numCourseReviews + numSecReviews
-
-    // Increment cumulative sum for ratings
-      sumCourseRating = sumCourseRating + sumSecRatings
-
-    // Calculate the # of course reviews and average rating and add to course Data
+      // Calculate the # of course reviews and average rating and add to course Data
       courseData.numReviews = numCourseReviews
       courseData.avgRating = sumCourseRating / numCourseReviews
   }
 
-  // return the standard response
+  // Return the standard response
   return {
     statusCode: 200,
     body: JSON.stringify(returnValue)
